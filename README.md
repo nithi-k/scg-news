@@ -4,8 +4,14 @@
 </head>
 <body>
   <h1>SCG News</h1>
-  ![IMG_2730](https://user-images.githubusercontent.com/5418396/232339742-dfba2d38-eca3-4ce0-a566-b0c88e04d1d5.PNG)
-  ![IMG_2731](https://user-images.githubusercontent.com/5418396/232339752-e20a2ae7-d142-4a4c-a5a6-0a9a8e02746b.PNG)
+ 
+<div align="center">
+  <img src="https://user-images.githubusercontent.com/5418396/232339742-dfba2d38-eca3-4ce0-a566-b0c88e04d1d5.PNG" alt="List" width="400">
+  <img src="https://user-images.githubusercontent.com/5418396/232339752-e20a2ae7-d142-4a4c-a5a6-0a9a8e02746b.PNG" alt="Detail" width="400">
+</div>
+
+  
+ 
   <h2>How to Run</h2>
   <ol>
     <li>Open the "App" folder and run <code>pod install</code>.</li>
