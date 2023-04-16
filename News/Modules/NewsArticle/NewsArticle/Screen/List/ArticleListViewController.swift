@@ -111,7 +111,8 @@ class ArticleListViewController: UIViewController, ViewType {
             
             // When tableView reaches bottom, get the current page from output and increment it by 1, then bind it to pagination input
             tableView.rx.reachedBottom()
-                .skip(2)
+                .withLatestFrom(output.display)
+                .filter { !$0.isEmpty }
                 .withLatestFrom(output.currentPage)
                 .map { $0 + 1 }
                 .bind(to: input.pagination),
