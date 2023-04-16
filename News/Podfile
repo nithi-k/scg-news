@@ -7,17 +7,16 @@ target 'News' do
   use_frameworks!
 
   # Pods for News
-  pod 'AppCoordinator',		:path => 'Modules/AppCoordinator'
-  pod 'APILayer',		:path => 'Modules/APILayer'
-  pod 'Core',			:path => 'Modules/Core'
-  pod 'CoreUI',			:path => 'Modules/CoreUI'
-  pod 'NewsArticle',            :path => 'Modules/NewsArticle'
+  pod 'AppCoordinator',		      :path => 'Modules/AppCoordinator'
+  pod 'APILayer',		            :path => 'Modules/APILayer'
+  pod 'Core',			              :path => 'Modules/Core'
+  pod 'CoreUI',			            :path => 'Modules/CoreUI'
+  pod 'NewsArticle',            :path => 'Modules/NewsArticle', :testspecs => ['Tests']
   pod 'Utils',                  :path => 'Modules/Utils'
   pod 'Wormholy'
 
   target 'NewsTests' do
     inherit! :search_paths
-    pod 'NewsArticle',            :path => 'Modules/NewsArticle'
     # Pods for testing
   end
 

@@ -16,6 +16,17 @@ Pod::Spec.new do |s|
     'NewsArticle' => ['Assets/**/*.{png,xcassets,json,txt,storyboard,xib,xcdatamodeld,strings}']
   }
   s.public_header_files = ["NewsArticle/Headers/**/*{.h,.hpp}"]
+
+   s.test_spec 'Tests' do |test_spec|
+    test_spec.source_files = 'UnitTest/**/*'
+    test_spec.requires_app_host = true
+    test_spec.dependency 'Core'
+    test_spec.dependency 'CoreUI'
+    test_spec.dependency 'APILayer'
+    test_spec.dependency 'Utils'
+    test_spec.dependency 'RxTest'
+
+   end  
   
   s.dependency 'Core'
   s.dependency 'CoreUI'
