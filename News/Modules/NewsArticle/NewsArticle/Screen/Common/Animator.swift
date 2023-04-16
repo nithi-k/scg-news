@@ -17,7 +17,13 @@ final class Animator: NSObject, UIViewControllerAnimatedTransitioning {
     private let destinationViewController: ArticleDetailViewController
     private var cellImageSnapShot: UIView
     private let cellImageViewRect: CGRect
-
+    
+    /// Init Animator
+    /// - Parameters:
+    ///   - type: PresentType (present or dismiss)
+    ///   - rootViewController: Root viewcontroller
+    ///   - destinationViewController: Destination viewContoller
+    ///   - cellImageSnapShot: Snap imageShort (Article image)
     init?(
         type: PresentationType,
         rootViewController: ArticleListViewController,
