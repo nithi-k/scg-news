@@ -176,16 +176,22 @@ extension ArticleListViewController {
 
 // Cutom Transition
 extension ArticleListViewController: UIViewControllerTransitioningDelegate {
+    // When a view controller is being presented:
+    // 1. Check if the presenting view controller is a UINavigationController
+    // 2. Get the root view controller of the UINavigationController
+    // 3. Get the presented view controller as ArticleDetailViewController
+    // 4. Get the snapshot of the selected cell's image view
+    // 5. Create an instance of the Animator class with relevant parameters
+    
+    /// present animation event
+    /// - Parameters:
+    ///   - presented: The view controller being presented.
+    ///   - presenting: Destination viewController
+    ///   - source: The view controller whose present(_:animated:completion:) method was called to initiate the presentation process.
+    /// - Returns: Animation Transision
     func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        // When a view controller is being presented:
-        // 1. Check if the presenting view controller is a UINavigationController
-        // 2. Get the root view controller of the UINavigationController
-        // 3. Get the presented view controller as ArticleDetailViewController
-        // 4. Get the snapshot of the selected cell's image view
-        // 5. Create an instance of the Animator class with relevant parameters
         guard
-            let navigationController = presenting as? UINavigationController,
-            let rootViewController = navigationController.viewControllers.first as? ArticleListViewController,
+            let rootViewController = source as? ArticleListViewController,
             let secondViewController = presented as? ArticleDetailViewController,
             let selectedCellImageViewSnapshot = selectedCellImageViewSnapshot
             else { return nil }
@@ -199,19 +205,23 @@ extension ArticleListViewController: UIViewControllerTransitioningDelegate {
         return animator
     }
 
+    // When a presented view controller is being dismissed:
+    // 1. Get the dismissed view controller as ArticleDetailViewController
+    // 2. Get the snapshot of the selected cell's image view
+    // 3. Create an instance of the Animator class with relevant parameters
+    
+    /// dismiss animation event
+    /// - Parameter dismissed: presentedViewController (It will ArticleDetailViewController in this case)
+    /// - Returns: Animation Transision
     func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        // When a presented view controller is being dismissed:
-        // 1. Get the dismissed view controller as ArticleDetailViewController
-        // 2. Get the snapshot of the selected cell's image view
-        // 3. Create an instance of the Animator class with relevant parameters
-        guard let secondViewController = dismissed as? ArticleDetailViewController,
+        guard let presentedViewController = dismissed as? ArticleDetailViewController,
             let selectedCellImageViewSnapshot = selectedCellImageViewSnapshot
             else { return nil }
 
         animator = Animator(
             type: .dismiss,
             rootViewController: self,
-            destinationViewController: secondViewController,
+            destinationViewController: presentedViewController,
             cellImageSnapShot: selectedCellImageViewSnapshot)
         return animator
     }

@@ -13,6 +13,16 @@ struct ArticleDisplayModel: Hashable {
     let articleURL: String
     let content: String
     
+    /// Init DisplayModel
+    /// - Parameters:
+    ///   - title: article's title
+    ///   - imageURL: article's imageURL
+    ///   - date: article's date (raw date)
+    ///   - author: article's author
+    ///   - sourceURL: article's sourceURL
+    ///   - description: article's description
+    ///   - articleURL: article's url
+    ///   - content: article's conent
     init(
         title: String,
         imageURL: String,

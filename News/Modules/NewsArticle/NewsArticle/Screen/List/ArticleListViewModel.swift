@@ -23,7 +23,7 @@ class ArticleListViewModel: ViewModelType {
     
     // Input and Output
     private let selectedArticle = PublishSubject<ArticleDisplayModel>()
-
+    
     struct Input {
         let pagination: AnyObserver<Int>
         let onSearching: AnyObserver<String>
@@ -38,6 +38,7 @@ class ArticleListViewModel: ViewModelType {
         let error: Observable<Error>
     }
     
+    /// Init view model
     init() {
         input = Input(
             pagination: pagination.asObserver(),
@@ -52,6 +53,7 @@ class ArticleListViewModel: ViewModelType {
         observeInput()
     }
     
+    /// Observe Input
     private func observeInput() {
         disposeBag.insert([
             onSearching
@@ -70,6 +72,10 @@ class ArticleListViewModel: ViewModelType {
         ])
     }
     
+    /// send NewsArticleEndpoint.Request request
+    /// - Parameters:
+    ///   - search: search string
+    ///   - page: pagination
     private func sendRequest(search: String, page: Int) {
         let defaultSeach = "Today" // Default keyword as 'Today'
         let search = search.isEmpty ? defaultSeach : search

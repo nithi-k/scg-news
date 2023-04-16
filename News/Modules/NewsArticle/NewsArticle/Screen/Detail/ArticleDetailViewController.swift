@@ -95,7 +95,6 @@ class ArticleDetailViewController: ContentStackViewController, ViewType {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-//        fadeAnimation()
     }
     
     func setupViews() {
@@ -112,19 +111,6 @@ class ArticleDetailViewController: ContentStackViewController, ViewType {
         addContent(view: contentLabel)
         addContent(view: UIView()) // add spacer
         showBackButton()
-    }
-    
-    private func fadeAnimation() {
-        let views = [dismissButton, descriptionContainerView, titleLabel, authorLabel, dateLabel, contentLabel]
-        views.forEach {
-            $0.alpha = 0
-        }
-        
-        UIView.animate(withDuration: 0.25) {
-            views.forEach {
-                $0.alpha = 1
-            }
-        }
     }
     
     func bindViewModel() {
@@ -147,6 +133,8 @@ class ArticleDetailViewController: ContentStackViewController, ViewType {
         self.viewModel = viewModel
     }
     
+    /// SetupDisplay
+    /// - Parameter display: ArticleDisplayModel
     private func setupDisplay(_ display: ArticleDisplayModel) {
         titleLabel.text = display.title
         titleLabel.setLineSpacing(lineSpacing: 1.5)
