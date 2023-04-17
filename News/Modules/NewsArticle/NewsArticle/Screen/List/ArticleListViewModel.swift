@@ -14,6 +14,9 @@ class ArticleListViewModel: ViewModelType {
     private let activityIndicator = ActivityIndicator()
     private let errorTracker = ErrorTracker()
     
+    // Scheduler
+    private let observationScheduler: SchedulerType
+    
     // Input
     private let pagination = BehaviorSubject<Int>(value: 0)
     private let onSearching = BehaviorSubject<String>(value: "")
@@ -42,8 +45,12 @@ class ArticleListViewModel: ViewModelType {
         let error: Observable<Error>
     }
     
-    /// Init view model
-    init() {
+    
+    /// Init ViewModel
+    /// - Parameter observationScheduler: Observable SchedulerType (default as MainScheduler.instance)
+    init(observationScheduler: SchedulerType = MainScheduler.instance) {
+        self.observationScheduler = observationScheduler
+        
         input = Input(
             pagination: pagination.asObserver(),
             onSearching: onSearching.asObserver(),
@@ -80,12 +87,13 @@ class ArticleListViewModel: ViewModelType {
                 .bind(to: input.selectedArticle),
             
             onSearching
-                .debounce(.milliseconds(300), scheduler: MainScheduler.instance)
+                .debounce(.milliseconds(300), scheduler: observationScheduler)
                 .distinctUntilChanged()
                 .subscribe(onNext: { [weak self] _ in
                     self?.display.onNext([]) // Clear display array
                     self?.pagination.onNext(1) // Reset pagination when starting seach
                 }),
+            
             pagination
                 .filter { $0 > 0 }
                 .withLatestFrom(onSearching) { ($0, $1) }
@@ -106,6 +114,7 @@ class ArticleListViewModel: ViewModelType {
         NewsArticleEndpoint
             .service
             .request(parameters: requst)
+            .observe(on: observationScheduler)
             .trackActivity(activityIndicator)
             .trackError(errorTracker)
             .catchErrorJustComplete()

@@ -6,7 +6,7 @@
 //
 
 import Foundation
-public struct APIError: LocalizedError {
+public struct APIError: LocalizedError, Hashable {
     public var code: String
     public var message: String
     public var httpError: Int?

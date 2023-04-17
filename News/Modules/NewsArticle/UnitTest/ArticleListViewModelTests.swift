@@ -1,5 +1,5 @@
 //
-//  TestViewModel.swift
+//  ArticleListViewModelTests.swift
 //  NewsArticle
 //
 //  Created by Nithi Kulasiriswatdi on 16/4/2566 BE.
@@ -9,89 +9,196 @@ import XCTest
 import RxSwift
 import RxCocoa
 import RxTest
+import APILayer
+import Core
+@testable import NewsArticle
 
 class ArticleListViewModelTests: XCTestCase {
-    func testClass() {
-        XCTAssertEqual("1", "1")
-    }
-}
-
-/*
-class ArticleListViewModelTests: XCTestCase {
-    var viewModel: ArticleListViewModel!
-    var scheduler: TestScheduler!
-    var disposeBag: DisposeBag!
+    var viewModel: ArticleListViewModel?
+    var disposeBag: DisposeBag?
+    var scheduler: TestScheduler?
+    
+    var environment: APILayer.URLEnvironment? = {
+        let environment = APILayer.URLEnvironment(
+            url: "MOCK",
+            cert: "MOCK",
+            name: "MOCK",
+            version: "MOCK",
+            apiKey: "MOCK",
+            debugMode: true)
+        APIConstants.shared.configure(baseUrl: environment)
+        return environment
+    }()
     
     override func setUp() {
         super.setUp()
-        viewModel = ArticleListViewModel()
-        scheduler = TestScheduler(initialClock: 0)
         disposeBag = DisposeBag()
+        scheduler = TestScheduler(initialClock: 0)
+        viewModel = ArticleListViewModel(observationScheduler: scheduler ?? MainScheduler.instance)
     }
     
     override func tearDown() {
-        viewModel = nil
-        scheduler = nil
         disposeBag = nil
+        viewModel = nil
+        environment = nil
+        scheduler = nil
         super.tearDown()
     }
     
-    func testInputOnSearching() {
+    func testOnSearching() throws {
+        guard
+            let disposeBag = disposeBag,
+            let scheduler = scheduler,
+            let input = viewModel?.input,
+            let output = viewModel?.output else {
+            return
+        }
         // Given
-        let searchObserver = scheduler.createObserver(String.self)
-        viewModel.input.onSearching.asObservable().subscribe(searchObserver).disposed(by: disposeBag)
+        let expectedResult = 1
+        registerSuccessMockAPI()
         
-        // When
-        scheduler.createColdObservable([.next(10, "query1"), .next(20, "query2"), .next(30, "query3")])
-            .bind(to: viewModel.input.onSearching)
-            .disposed(by: disposeBag)
+        let page = scheduler.createObserver(Int.self)
+        disposeBag.insert([
+            // bind the result
+            output.currentPage
+                .bind(to: page),
+            
+            // When
+            scheduler.createColdObservable(
+                [
+                    .next(5, ())
+                ])
+                .bind(to: input.reachedBottom),
+            
+            scheduler.createColdObservable(
+                [
+                    .next(10, "keyword")
+                ])
+                .bind(to: input.onSearching)
+        ])
         
         scheduler.start()
         
         // Then
-        XCTAssertEqual(searchObserver.events, [.next(310, "query1"), .next(320, "query2"), .next(330, "query3")])
+        XCTAssertEqual(
+            page.events, [
+                .next(0, 0), // behavior value
+                .next(1, 1), // update from default serach (wait for debounce)
+                .next(5, 2), // update count from pagination
+                .next(11, expectedResult) // clear page count when start searching
+            ])
     }
     
-    func testInputPagination() {
+    func testReachedBottom() {
+        guard
+            let disposeBag = disposeBag,
+            let scheduler = scheduler,
+            let input = viewModel?.input,
+            let output = viewModel?.output else {
+            return
+        }
         // Given
-        let paginationObserver = scheduler.createObserver(Int.self)
-        viewModel.input.pagination.asObservable().subscribe(paginationObserver).disposed(by: disposeBag)
+        let page = scheduler.createObserver(Int.self)
+        let expectedResult = 2
+        registerSuccessMockAPI()
+
+        disposeBag.insert([
+            /// bind the result
+            output.currentPage
+                .bind(to: page),
+            // When
+            scheduler.createColdObservable([.next(10, ())])
+                .bind(to: input.reachedBottom)
+        ])
+        scheduler.start()
         
-        // When
-        scheduler.createColdObservable([.next(10, 1), .next(20, 2), .next(30, 3)])
-            .bind(to: viewModel.input.pagination)
-            .disposed(by: disposeBag)
+        // Then
+        XCTAssertEqual(
+            page.events, [
+                .next(0, 0), // behavior value
+                .next(1, 1), // update from default serach (wait for debounce)
+                .next(10, expectedResult) // reaach buttom and load next page
+            ])
+    }
+    
+    func testPressSearch() throws {
+        guard
+            let disposeBag = disposeBag,
+            let scheduler = scheduler,
+            let input = viewModel?.input,
+            let output = viewModel?.output else {
+            return
+        }
+        // Given
+        let expectedResult = true
+        registerSuccessMockAPI()
+        
+        let didSelecteArticle = scheduler.createObserver(Bool.self)
+        
+        disposeBag.insert([
+            // bind the result
+            output.didSelecteArticle
+                .map { _ in return true }
+                .bind(to: didSelecteArticle),
+            
+            // When
+            scheduler.createColdObservable(
+                [
+                    .next(10, ())
+                ])
+                .bind(to: input.searchButtonClicked)
+        ])
         
         scheduler.start()
         
         // Then
-        XCTAssertEqual(paginationObserver.events, [.next(310, 1), .next(320, 2), .next(330, 3)])
+        XCTAssertEqual(
+            didSelecteArticle.events, [
+                .next(10, expectedResult) // didSelecteArticle got trigged when searchButtonClicked
+            ])
     }
     
-    func testOutputDisplay() {
+    func testErrorResponse() throws {
+        guard
+            let disposeBag = disposeBag,
+            let scheduler = scheduler,
+            let output = viewModel?.output else {
+            return
+        }
         // Given
-        let displayObserver = scheduler.createObserver([ArticleDisplayModel].self)
-        viewModel.output.display.asObservable().subscribe(displayObserver).disposed(by: disposeBag)
+        let expectedResult = APIError(
+            code: "Error Code",
+            message: "Error message",
+            httpError: nil
+        )
+        registerFailMockAPI()
         
-        // When
-        let articles = [
-            ArticleDisplayModel(title: "Title1", imageURL: "ImageURL1", date: "Date1", author: "Author1",
-                                sourceURL: "SourceURL1", description: "Description1", articleURL: "ArticleURL1", content: "Content1"),
-            ArticleDisplayModel(title: "Title2", imageURL: "ImageURL2", date: "Date2", author: "Author2",
-                                sourceURL: "SourceURL2", description: "Description2", articleURL: "ArticleURL2", content: "Content2"),
-            ArticleDisplayModel(title: "Title3", imageURL: "ImageURL3", date: "Date3", author: "Author3",
-                                sourceURL: "SourceURL3", description: "Description3", articleURL: "ArticleURL3", content: "Content3")
-        ]
-        scheduler.createColdObservable([.next(10, articles)])
-            .bind(to: viewModel.output.display)
-            .disposed(by: disposeBag)
+        let receiveError = scheduler.createObserver(APIError.self)
+        
+        disposeBag.insert([
+            // bind the result
+            output.error.compactMap { $0 as? APIError }.bind(to: receiveError)
+        ])
         
         scheduler.start()
         
         // Then
-        XCTAssertEqual(displayObserver.events, [.next(310, articles)])
+        XCTAssertEqual(
+            receiveError.events, [
+                .next(2, expectedResult)
+            ])
     }
     
-    // Add more tests for other input and output properties and methods as needed
+    // TODO: Add more cases in the future
+}
+
+// MARK: Mock functions
+extension ArticleListViewModelTests {
+    private func registerSuccessMockAPI() {
+        NewsArticleEndpoint.service.registerFake(withResponseFile: "success_mock.json" )
+    }
     
-}*/
+    private func registerFailMockAPI() {
+        NewsArticleEndpoint.service.registerFake(withResponseFile: "fail_invalid_input.json" )
+    }
+}
