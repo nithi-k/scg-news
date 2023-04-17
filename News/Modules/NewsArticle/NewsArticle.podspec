@@ -19,16 +19,9 @@ Pod::Spec.new do |s|
 
    s.test_spec 'Tests' do |test_spec|
     test_spec.source_files = 'UnitTest/**/*'
-    test_spec.requires_app_host = true
-    test_spec.dependency 'Core'
-    test_spec.dependency 'CoreUI'
-    test_spec.dependency 'APILayer'
-    test_spec.dependency 'Utils'
     test_spec.dependency 'RxTest'
-
    end  
   
-  s.dependency 'Core'
   s.dependency 'CoreUI'
   s.dependency 'APILayer'
   s.dependency 'Utils'

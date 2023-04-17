@@ -21,8 +21,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         AppFont.registerFonts
         configEnvironment()
-        //        NewsArticleEndpoint.service.registerFake(withResponseFile: "success_mock.json" )
-        //        NewsArticleEndpoint.service.registerFake(withResponseFile: "fail_invalid_input.json" )
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.windowScene = windowScene
         window?.backgroundColor = .white
