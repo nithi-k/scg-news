@@ -12,9 +12,6 @@ Pod::Spec.new do |s|
   s.ios.deployment_target = '13.0'
   s.swift_version    = '5.0'
   s.source_files     = 'Utils/**/*'
-  s.resource_bundles = {
-    'Utils' => ['Assets/**/*.{png,xcassets,json,txt,storyboard,xib,xcdatamodeld,strings}']
-  }
   s.public_header_files = ["Utils/Headers/**/*{.h,.hpp}"]
   
   s.dependency 'RxSwift'

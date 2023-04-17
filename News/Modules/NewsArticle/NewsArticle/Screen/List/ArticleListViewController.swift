@@ -101,21 +101,14 @@ class ArticleListViewController: UIViewController, ViewType {
             // MARK: Input
             // When search button is clicked, get the first article from the display array and bind it to selectedArticle input
             searchBar.rx.searchButtonClicked
-                .withLatestFrom(output.display)
-                .compactMap { $0.first }
-                .bind(to: input.selectedArticle),
+                .bind(to: input.searchButtonClicked),
             
             // When text changes in the searchBar, bind it to onSearching input
             searchBar.rx.text.compactMap { return $0 ?? "" }
                 .bind(to: input.onSearching),
             
-            // When tableView reaches bottom, get the current page from output and increment it by 1, then bind it to pagination input
             tableView.rx.reachedBottom()
-                .withLatestFrom(output.display)
-                .filter { !$0.isEmpty }
-                .withLatestFrom(output.currentPage)
-                .map { $0 + 1 }
-                .bind(to: input.pagination),
+                .bind(to: input.reachedBottom),
             
             tableView.rx.itemSelected
                 .subscribe(onNext: { [weak self] in

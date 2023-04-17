@@ -2,22 +2,28 @@
 
 platform :ios, '13.0'
 
+def development_pod
+  pod 'AppCoordinator',		:path => 'Modules/AppCoordinator'
+  pod 'APILayer',		:path => 'Modules/APILayer'
+  pod 'Core',			:path => 'Modules/Core'
+  pod 'CoreUI',			:path => 'Modules/CoreUI'
+#  pod 'NewsArticle',		:path => 'Modules/NewsArticle', :testspecs => ['Tests']
+  pod 'NewsArticle',    :path => 'Modules/NewsArticle'
+  pod 'Utils',			:path => 'Modules/Utils'
+  pod 'Base',     		:path => 'Modules/Base'
+end
+
 target 'News' do
   # Comment the next line if you don't want to use dynamic frameworks
   use_frameworks!
 
   # Pods for News
-  pod 'AppCoordinator',		      :path => 'Modules/AppCoordinator'
-  pod 'APILayer',		            :path => 'Modules/APILayer'
-  pod 'Core',			              :path => 'Modules/Core'
-  pod 'CoreUI',			            :path => 'Modules/CoreUI'
-  pod 'NewsArticle',            :path => 'Modules/NewsArticle', :testspecs => ['Tests']
-  pod 'Utils',                  :path => 'Modules/Utils'
+  development_pod
   pod 'Wormholy'
-
+  
   target 'NewsTests' do
     inherit! :search_paths
-    # Pods for testing
+    development_pod
   end
 
   target 'NewsUITests' do

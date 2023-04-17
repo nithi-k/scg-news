@@ -14,8 +14,6 @@ Pod::Spec.new do |s|
     'APILayer' => ['MockResponse/**/*.{json}']
   }
   
-  s.dependency 'RxSwift'
-  s.dependency 'RxCocoa'
   s.dependency 'Networking'
   s.dependency 'Core'
 
