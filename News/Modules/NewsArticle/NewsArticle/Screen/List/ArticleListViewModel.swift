@@ -17,6 +17,8 @@ class ArticleListViewModel: ViewModelType {
     // Input
     private let pagination = BehaviorSubject<Int>(value: 0)
     private let onSearching = BehaviorSubject<String>(value: "")
+    private let reachedBottom = PublishSubject<Void>()
+    private let searchButtonClicked = PublishSubject<Void>()
     
     // Output
     private let display = BehaviorSubject<[ArticleDisplayModel]>(value: [])
@@ -28,6 +30,8 @@ class ArticleListViewModel: ViewModelType {
         let pagination: AnyObserver<Int>
         let onSearching: AnyObserver<String>
         let selectedArticle: AnyObserver<ArticleDisplayModel>
+        let reachedBottom: AnyObserver<Void>
+        let searchButtonClicked: AnyObserver<Void>
     }
     
     struct Output {
@@ -43,19 +47,38 @@ class ArticleListViewModel: ViewModelType {
         input = Input(
             pagination: pagination.asObserver(),
             onSearching: onSearching.asObserver(),
-            selectedArticle: selectedArticle.asObserver())
+            selectedArticle: selectedArticle.asObserver(),
+            reachedBottom: reachedBottom.asObserver(),
+            searchButtonClicked: searchButtonClicked.asObserver()
+        )
+        
         output = Output(
             loading: activityIndicator.asDriver(onErrorJustReturn: false).asObservable(),
             display: display.asDriverOnErrorJustComplete(),
             didSelecteArticle: selectedArticle.asObservable(),
             currentPage: pagination.asObservable(),
-            error: errorTracker.asObservable())
+            error: errorTracker.asObservable()
+        )
         observeInput()
     }
     
     /// Observe Input
     private func observeInput() {
         disposeBag.insert([
+            // When tableView reaches bottom, get the current page from output and increment it by 1, then bind it to pagination input
+            reachedBottom
+                .withLatestFrom(output.display)
+                .filter { !$0.isEmpty }
+                .withLatestFrom(output.currentPage)
+                .map { $0 + 1 }
+                .bind(to: input.pagination),
+            
+            // When search button is clicked, get the first article from the display array and bind it to selectedArticle input
+            searchButtonClicked
+                .withLatestFrom(output.display)
+                .compactMap { $0.first }
+                .bind(to: input.selectedArticle),
+            
             onSearching
                 .debounce(.milliseconds(300), scheduler: MainScheduler.instance)
                 .distinctUntilChanged()
