@@ -1,5 +1,15 @@
 # Uncomment the next line to define a global platform for your project
 
+def pod_group
+  pod 'AppCoordinator',          :path => 'Modules/AppCoordinator'
+  pod 'APILayer',                :path => 'Modules/APILayer'
+  pod 'Core',                    :path => 'Modules/Core'
+  pod 'CoreUI',                  :path => 'Modules/CoreUI'
+  pod 'NewsArticle',            :path => 'Modules/NewsArticle', :testspecs => ['Tests']
+  pod 'Utils',                  :path => 'Modules/Utils'
+  pod 'Wormholy'
+end
+
 platform :ios, '13.0'
 
 target 'News' do
@@ -7,17 +17,11 @@ target 'News' do
   use_frameworks!
 
   # Pods for News
-  pod 'AppCoordinator',		      :path => 'Modules/AppCoordinator'
-  pod 'APILayer',		            :path => 'Modules/APILayer'
-  pod 'Core',			              :path => 'Modules/Core'
-  pod 'CoreUI',			            :path => 'Modules/CoreUI'
-  pod 'NewsArticle',            :path => 'Modules/NewsArticle', :testspecs => ['Tests']
-  pod 'Utils',                  :path => 'Modules/Utils'
-  pod 'Wormholy'
-
+  pod_group
+  
   target 'NewsTests' do
     inherit! :search_paths
-    # Pods for testing
+    pod_group
   end
 
   target 'NewsUITests' do
