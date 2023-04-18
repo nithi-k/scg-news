@@ -28,6 +28,7 @@ class ArticleListViewModel: ViewModelType {
     
     // Input and Output
     private let selectedArticle = PublishSubject<ArticleDisplayModel>()
+    private let selectItemAtIndex = PublishSubject<Int>()
     
     struct Input {
         let pagination: AnyObserver<Int>
@@ -35,11 +36,13 @@ class ArticleListViewModel: ViewModelType {
         let selectedArticle: AnyObserver<ArticleDisplayModel>
         let reachedBottom: AnyObserver<Void>
         let searchButtonClicked: AnyObserver<Void>
+        let selectItemAtIndex: AnyObserver<Int>
     }
     
     struct Output {
         let loading: Observable<Bool>
         let display: Driver<[ArticleDisplayModel]>
+        let didselectItemAtIndex: Observable<Int>
         let didSelecteArticle: Observable<ArticleDisplayModel>
         let currentPage: Observable<Int>
         let error: Observable<Error>
@@ -56,12 +59,14 @@ class ArticleListViewModel: ViewModelType {
             onSearching: onSearching.asObserver(),
             selectedArticle: selectedArticle.asObserver(),
             reachedBottom: reachedBottom.asObserver(),
-            searchButtonClicked: searchButtonClicked.asObserver()
+            searchButtonClicked: searchButtonClicked.asObserver(),
+            selectItemAtIndex: selectItemAtIndex.asObserver()
         )
         
         output = Output(
             loading: activityIndicator.asDriver(onErrorJustReturn: false).asObservable(),
             display: display.asDriverOnErrorJustComplete(),
+            didselectItemAtIndex: selectItemAtIndex.asObservable(),
             didSelecteArticle: selectedArticle.asObservable(),
             currentPage: pagination.asObservable(),
             error: errorTracker.asObservable()
@@ -72,18 +77,28 @@ class ArticleListViewModel: ViewModelType {
     /// Observe Input
     private func observeInput() {
         disposeBag.insert([
+            // When search button is clicked, get the first article from the display array and bind it to selectedArticle input
+            searchButtonClicked
+                .map { 0 }
+                .bind(to: selectItemAtIndex),
+            
             // When tableView reaches bottom, get the current page from output and increment it by 1, then bind it to pagination input
             reachedBottom
                 .withLatestFrom(output.display)
                 .filter { !$0.isEmpty }
+                .withLatestFrom(output.loading)
+                .filter { !$0 }
                 .withLatestFrom(output.currentPage)
                 .map { $0 + 1 }
                 .bind(to: input.pagination),
             
-            // When search button is clicked, get the first article from the display array and bind it to selectedArticle input
-            searchButtonClicked
-                .withLatestFrom(output.display)
-                .compactMap { $0.first }
+            selectItemAtIndex
+                .delay(.milliseconds(100), scheduler: observationScheduler)
+                .withLatestFrom(output.display) { ($0, $1) }
+                .filter { index, display in
+                    0 ..< display.count ~= index // check if index is in range
+                }
+                .map { index, display in display[index] }
                 .bind(to: input.selectedArticle),
             
             onSearching
@@ -143,7 +158,9 @@ class ArticleListViewModel: ViewModelType {
                 // Append new data
                 return $0.1 + $0.0
             }
-            .bind(to: display)
+            .subscribe(onNext: { [weak self] in
+                self?.display.onNext($0)
+            })
             .disposed(by: disposeBag)
     }
 }

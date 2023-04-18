@@ -41,7 +41,7 @@ extension SceneDelegate {
             url: "https://newsapi.org/v2",
             name: "news",
             version: "0.0.1",
-            apiKey: "821f13277bf54e2d8adf1fc57db05a26", // paste your api here
+            apiKey: "489fe11e949b469f9ab0e0beaf74efdb", // paste your api here
             debugMode: true)
         APIConstants.shared.configure(baseUrl: environment)
     }

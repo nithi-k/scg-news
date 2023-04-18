@@ -130,16 +130,15 @@ class ArticleListViewModelTests: XCTestCase {
             return
         }
         // Given
-        let expectedResult = true
+        let expectedResult = 0
         registerSuccessMockAPI()
         
-        let didSelecteArticle = scheduler.createObserver(Bool.self)
+        let didSelectItemAtIndex = scheduler.createObserver(Int.self)
         
         disposeBag.insert([
             // bind the result
-            output.didSelecteArticle
-                .map { _ in return true }
-                .bind(to: didSelecteArticle),
+            output.didselectItemAtIndex
+                .bind(to: didSelectItemAtIndex),
             
             // When
             scheduler.createColdObservable(
@@ -153,8 +152,8 @@ class ArticleListViewModelTests: XCTestCase {
         
         // Then
         XCTAssertEqual(
-            didSelecteArticle.events, [
-                .next(10, expectedResult) // didSelecteArticle got trigged when searchButtonClicked
+            didSelectItemAtIndex.events, [
+                .next(10, 0) //Did select first item (index = 0)
             ])
     }
     

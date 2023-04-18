@@ -99,7 +99,6 @@ class ArticleListViewController: UIViewController, ViewType {
 
         disposeBag.insert([
             // MARK: Input
-            // When search button is clicked, get the first article from the display array and bind it to selectedArticle input
             searchBar.rx.searchButtonClicked
                 .bind(to: input.searchButtonClicked),
             
@@ -109,22 +108,10 @@ class ArticleListViewController: UIViewController, ViewType {
             
             tableView.rx.reachedBottom()
                 .bind(to: input.reachedBottom),
-            
+        
             tableView.rx.itemSelected
-                .subscribe(onNext: { [weak self] in
-                    // When an item is selected in the table view:
-                    // 1. Store the selected cell in `selectedCell` property
-                    self?.selectedCell = self?.tableView.cellForRow(at: $0) as? ArticleCell
-                    // 2. Take a snapshot of the article image view in the selected cell
-                    let articleImageView = self?.selectedCell?.articleImageView
-                    self?.selectedCellImageViewSnapshot = articleImageView?.snapshotView(afterScreenUpdates: false)
-                }),
-            
-            tableView.rx.itemSelected
-                .delay(.milliseconds(100), scheduler: MainScheduler.instance)
-                .withLatestFrom(output.display) { ($0, $1) }
-                .map { index, display in display[index.row] }
-                .bind(to: input.selectedArticle),
+                .map { $0.row }
+                .bind(to: input.selectItemAtIndex),
          
             // MARK: Output
             output.display
@@ -138,6 +125,16 @@ class ArticleListViewController: UIViewController, ViewType {
                 .drive(tableView.rx.items(
                     cellIdentifier: String(describing: ArticleCell.self),
                     cellType: ArticleCell.self)) { _, target, cell in cell.setupDisplay(target) },
+            
+            output.didselectItemAtIndex
+                .subscribe(onNext: { [weak self] in
+                    // When an item is selected in the table view:
+                    // 1. Store the selected cell in `selectedCell` property
+                    self?.selectedCell = self?.tableView.cellForRow(at: IndexPath(row: $0, section: 0)) as? ArticleCell
+                    // 2. Take a snapshot of the article image view in the selected cell
+                    let articleImageView = self?.selectedCell?.articleImageView
+                    self?.selectedCellImageViewSnapshot = articleImageView?.snapshotView(afterScreenUpdates: false)
+                }),
             
             output.loading
                 .subscribe(onNext: { [weak self] in
