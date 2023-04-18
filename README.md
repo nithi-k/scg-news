@@ -16,8 +16,11 @@
   <ol>
     <li>Open the "App" folder and run <code>pod install</code>.</li>
     <li>Swap the development profile as needed at Signing &amp; Capabilities and edit the user pod profile in the Podfile configuration.</li>
+    <li> Update your <code>API_KEY</code>. in scene delegate</li>
+<img width="400" alt="API_KEY" src="https://user-images.githubusercontent.com/5418396/232744927-edab11ec-25c5-4816-b9e0-bab56064147c.png">
     <li>Press run on your desired device (Simulator or Real device) in Xcode.</li>
   </ol>
+
 
   <h2>How to Use</h2>
   <h3>News Search</h3>
